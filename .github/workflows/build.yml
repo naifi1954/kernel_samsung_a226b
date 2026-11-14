@@ -80,30 +80,27 @@ jobs:
           )
           make "${MAKE_ARGS[@]}" "$DEFCONFIG"
           make -j"$(nproc)" "${MAKE_ARGS[@]}" 2>&1 | tee ../build.log
-          ls -lh out/arch/arm64/boot/
 
       - name: Package AnyKernel3
         run: |
-          git clone --depth=1 "$ANYKERNEL_REPO" AnyKernel3
+          git clone --depth=1 -b a22x "$ANYKERNEL_REPO" AnyKernel3
           rm -rf AnyKernel3/.git
           BOOT=kernel/out/arch/arm64/boot
-          for f in Image.gz-dtb Image.gz Image; do
+          for f in Image.gz Image; do
             if [ -f "$BOOT/$f" ]; then cp "$BOOT/$f" AnyKernel3/; echo "pakai $f"; break; fi
           done
-          cd AnyKernel3
-          zip -r9 "../a22x-kernel-$(date +%Y%m%d-%H%M).zip" . -x '*.git*' README.md
+          
+      - name: AnyKernel3 Flashable
+        uses: actions/upload-artifact@v7
+        with:
+          compression-level: 9
+          name: a22x-kernel-$(date +%Y%m%d-%H%M).zip
+          path: AnyKernel3
 
-      - name: Upload zip
+      - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-zip
-          path: a22x-kernel-*.zip
-
-      - name: Upload Image.gz mentah
-        uses: actions/upload-artifact@v4
-        with:
-          name: Image
-          path: kernel/out/arch/arm64/boot/Image*
+          path: kernel/out/arch/arm64/boot/Image.gz
           if-no-files-found: warn
 
       - name: Build Log
@@ -111,4 +108,4 @@ jobs:
         run : |
           if [ -f build.log ]; then
             grep "error" build.log
-          f
+          fi
