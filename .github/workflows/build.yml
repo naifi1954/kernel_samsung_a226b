@@ -21,11 +21,6 @@ jobs:
       ANYKERNEL_REPO: ${{ inputs.anykernel_repo }}
       TZ: Asia/Jakarta
     steps:
-    
-      - name: Clean Up disk runner
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
 
       - name: Install dependencies
         run: |
