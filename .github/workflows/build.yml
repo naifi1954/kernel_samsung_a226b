@@ -94,14 +94,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           compression-level: 9
-          name: a22x-kernel-$(date +%Y%m%d-%H%M).zip
+          name: AnyKernel3-a226b-kernel.zip
           path: AnyKernel3
-
-      - name: Upload Image
-        uses: actions/upload-artifact@v4
-        with:
-          path: kernel/out/arch/arm64/boot/Image.gz
-          if-no-files-found: warn
 
       - name: Build Log
         if: failure()
@@ -109,3 +103,7 @@ jobs:
           if [ -f build.log ]; then
             grep "error" build.log
           fi
+
+      - name: Kernel Version
+        run: |
+          strings kernel/out/arch/arm64/boot/Image | grep "Linux version"
