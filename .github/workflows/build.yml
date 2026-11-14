@@ -45,19 +45,20 @@ jobs:
         run: |
           mkdir -p tc && cd tc
 
-          # Clang Setup
           git clone --depth=1 -b android11-release --filter=blob:none --sparse \
             https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 clang
           git -C clang sparse-checkout set clang-r383902
-          
-          # GCC Setup
-          git clone --depth=1 \
-            https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 gcc64
-          git clone --depth=1 \
-            https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 gcc32
-            
-          ls clang/clang-r383902/bin | head
-          ls gcc64/bin | grep gcc$
+
+          clone_gcc() {
+            git clone --depth=1 -b android11-release \
+              "https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/$1" "$3" \
+            || git clone --depth=1 -b lineage-18.1 "https://github.com/LineageOS/$2" "$3"
+          }
+          clone_gcc aarch64/aarch64-linux-android-4.9 android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 gcc64
+          clone_gcc arm/arm-linux-androideabi-4.9 android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 gcc32
+
+          test -d gcc64/bin && test -d gcc32/bin
+          ls gcc64/bin | grep 'gcc$' || true
 
       - name: Build
         working-directory: kernel
@@ -113,4 +114,6 @@ jobs:
       - name: Build Log
         if: failure()
         run : |
-          grep "error" build.log
+          if [ -f build.log ]; then
+            grep "error" build.log
+          f
